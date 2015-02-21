@@ -1,0 +1,68 @@
+XBox One & PS4 CrossPlatform Comparison Tool
+========================================================
+author: Pedja Spanovic
+date: February 20, 2015
+transition: rotate
+autosize: true
+
+Overview
+========================================================
+
+It's been about 15 months since we've been comparing Sony's Playstation 4 and Microsoft's XBox One. 
+      One of the most important considerations for those still lingering on which console to buy is the selection 
+      of games. This interactive application allows users to run some simple analysis that may help them make 
+      that decision.
+
+**https://pspanovic.shinyapps.io/crossplatform/**
+
+About The Data
+===
+
+183 games on either XB1 or PS4 or both, extracted from **TheGamesDB.net** on Feb 5, 2015. The data does not include games released after this date.
+
+Data Fields:
+- *Game Title*
+- *Platform Availability*
+- *Release Year*
+- *Genre*
+- *ESRB Rating*
+
+Although this is a fairly simple data set, this application allows us to extract some useful insights. 
+
+Product Features
+===
+- Exclusive game counts
+- Genre comparisons
+- ESRB ratings comparisons
+- Browse the inventory of games
+- Toggle between stacked and clustered charts
+- Filter through a list of dependent and independent variables
+
+Example
+========================================================
+
+By clicking on the 'XGenre' tab, a user is able to see which platform they may want to buy based on the genres of games they are interested in playing. In the below example, someone interested in playing a greater variety of adventure games may wish to try PS4. Or if they mainly play fighting games, the XB1 will have a better variety.
+
+```{r results='asis', echo=FALSE}
+library(googleVis)
+library(sqldf)
+ds = read.csv("data/dataset.csv")
+genre_platform = sqldf("select case when Genre = 'Construction an...' then 'Construction'
+                                    when Genre = 0 then 'Unspecified' else Genre end as Genre,
+                                sum(case when Platform = 'Both Platforms' then 1 else 0 end) as both,
+                       sum(case when Platform = 'PS4 Exclusive' then 1 else 0 end) as ps4,
+                       sum(case when Platform = 'Xbox One Exclusive' then 1 else 0 end) as xb1
+                       from ds
+                       group by 1") 
+genre_chart = 
+gvisColumnChart(subset(genre_platform, Genre %in% c("Adventure","Fighting","Racing","Shooter","Sports")), 
+                        options = list(isStacked = FALSE,
+                                       legend = 'bottom',
+                                       vAxis = "{title: '# Games', titleTextStyle: {color: '#2E64FE'}}"
+                                       ))
+print(genre_chart,'chart')
+```
+
+
+Try it out! **https://pspanovic.shinyapps.io/crossplatform/**
+
